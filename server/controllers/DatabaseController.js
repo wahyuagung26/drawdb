@@ -604,6 +604,240 @@ class DatabaseController {
       transform: { zoom: 1, pan: { x: 0, y: 0 } }
     };
   }
+
+  /**
+   * STATELESS API METHODS FOR REACT MODAL
+   */
+
+  /**
+   * Test database connection without storing in session
+   * POST /api/database/test-connection
+   */
+  static async testConnection(req, res) {
+    try {
+      const { type, host, port, username, password, database } = req.body;
+
+      // Validate required fields
+      if (!type || !username) {
+        return res.status(400).json({
+          success: false,
+          error: 'Database type and username are required'
+        });
+      }
+
+      // Validate database type
+      const supportedTypes = ['mysql', 'postgres', 'sqlite'];
+      if (!supportedTypes.includes(type)) {
+        return res.status(400).json({
+          success: false,
+          error: `Unsupported database type. Supported types: ${supportedTypes.join(', ')}`
+        });
+      }
+
+      const config = {
+        type,
+        host: host || 'localhost',
+        port: parseInt(port) || (type === 'mysql' ? 3306 : type === 'postgres' ? 5432 : null),
+        username,
+        password: password || '',
+        database: database || null
+      };
+
+      // Test connection (create and immediately close)
+      const connectionId = await DatabaseService.createConnection(config);
+      await DatabaseService.closeConnection(connectionId);
+
+      res.json({
+        success: true,
+        message: 'Connection successful',
+        config: {
+          type: config.type,
+          host: config.host,
+          port: config.port,
+          database: config.database
+        }
+      });
+
+    } catch (error) {
+      console.error('Test connection error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to connect to database'
+      });
+    }
+  }
+
+  /**
+   * List databases with connection parameters
+   * POST /api/database/get-databases
+   */
+  static async getDatabasesWithConnection(req, res) {
+    let connectionId = null;
+    try {
+      const { type, host, port, username, password, database } = req.body;
+
+      if (!type || !username) {
+        return res.status(400).json({
+          success: false,
+          error: 'Database type and username are required'
+        });
+      }
+
+      const config = {
+        type,
+        host: host || 'localhost',
+        port: parseInt(port) || (type === 'mysql' ? 3306 : type === 'postgres' ? 5432 : null),
+        username,
+        password: password || '',
+        database: database || null
+      };
+
+      // Create temporary connection
+      connectionId = await DatabaseService.createConnection(config);
+      const databases = await DatabaseService.listDatabases(connectionId);
+
+      res.json({
+        success: true,
+        databases: databases.map(db => ({ name: db, type: 'database' }))
+      });
+
+    } catch (error) {
+      console.error('List databases error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to list databases'
+      });
+    } finally {
+      // Always cleanup connection
+      if (connectionId) {
+        try {
+          await DatabaseService.closeConnection(connectionId);
+        } catch (cleanupError) {
+          console.error('Cleanup error:', cleanupError);
+        }
+      }
+    }
+  }
+
+  /**
+   * List tables with connection parameters and database
+   * POST /api/database/get-tables
+   */
+  static async getTablesWithConnection(req, res) {
+    let connectionId = null;
+    try {
+      const { type, host, port, username, password, database, selectedDatabase } = req.body;
+
+      if (!type || !username || !selectedDatabase) {
+        return res.status(400).json({
+          success: false,
+          error: 'Database type, username, and selectedDatabase are required'
+        });
+      }
+
+      const config = {
+        type,
+        host: host || 'localhost',
+        port: parseInt(port) || (type === 'mysql' ? 3306 : type === 'postgres' ? 5432 : null),
+        username,
+        password: password || '',
+        database: database || null
+      };
+
+      // Create temporary connection
+      connectionId = await DatabaseService.createConnection(config);
+      const tables = await DatabaseService.listTables(connectionId, selectedDatabase);
+
+      res.json({
+        success: true,
+        database: selectedDatabase,
+        tables: tables.map(table => ({
+          name: table.name,
+          type: table.type || 'table',
+          rowCount: table.rowCount || null,
+          size: table.size || null
+        }))
+      });
+
+    } catch (error) {
+      console.error('List tables error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to list tables'
+      });
+    } finally {
+      // Always cleanup connection
+      if (connectionId) {
+        try {
+          await DatabaseService.closeConnection(connectionId);
+        } catch (cleanupError) {
+          console.error('Cleanup error:', cleanupError);
+        }
+      }
+    }
+  }
+
+  /**
+   * Import schema directly without session storage
+   * POST /api/database/import-schema
+   */
+  static async importSchemaDirectly(req, res) {
+    let connectionId = null;
+    try {
+      const { type, host, port, username, password, database, selectedDatabase, selectedTables } = req.body;
+
+      if (!type || !username || !selectedDatabase || !selectedTables || !Array.isArray(selectedTables) || selectedTables.length === 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Database type, username, selectedDatabase, and selectedTables array are required'
+        });
+      }
+
+      const config = {
+        type,
+        host: host || 'localhost',
+        port: parseInt(port) || (type === 'mysql' ? 3306 : type === 'postgres' ? 5432 : null),
+        username,
+        password: password || '',
+        database: database || null
+      };
+
+      // Create temporary connection
+      connectionId = await DatabaseService.createConnection(config);
+
+      // Get table schema
+      const schema = await DatabaseService.getTableSchema(connectionId, selectedDatabase, selectedTables);
+
+      // Generate DBML
+      const dbml = DatabaseController.convertSchemaToDBML(schema, {});
+
+      // Convert DBML to diagram JSON format
+      const diagramData = DatabaseController.convertDBMLToDiagram(dbml, selectedDatabase);
+
+      res.json({
+        success: true,
+        database: selectedDatabase,
+        selectedTables,
+        diagramData
+      });
+
+    } catch (error) {
+      console.error('Import schema error:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to import schema'
+      });
+    } finally {
+      // Always cleanup connection
+      if (connectionId) {
+        try {
+          await DatabaseService.closeConnection(connectionId);
+        } catch (cleanupError) {
+          console.error('Cleanup error:', cleanupError);
+        }
+      }
+    }
+  }
 }
 
 module.exports = DatabaseController;

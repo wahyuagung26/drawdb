@@ -1,9 +1,0 @@
-{
-  "id": "2c254de9-1adb-4845-b3c8-6a6b61ffe28c",
-  "filename": "share.json",
-  "description": "DrawDB diagram - almaahira_chart",
-  "content": "Project DrawDB_Import {\n  database_type: 'Multi-Database'\n  Note: 'Generated from database import at 2025-09-24T15:41:40.082Z'\n}\n\nTable m_mapel {\n  id INT [pk, increment, not null]\n  code VARCHAR [not null]\n  name VARCHAR [not null]\n}\n\nTable m_user {\n  id INT [pk, increment, not null]\n  nama VARCHAR\n  email VARCHAR [not null]\n  password VARCHAR [not null]\n}\n\nTable t_task {\n  id INT [pk, increment, not null]\n  spreadsheets_link VARCHAR [not null]\n  spreadsheets_id VARCHAR [not null]\n  mapel TEXT [not null]\n  status ENUM [not null]\n  created_at DATETIME [not null]\n  updated_at DATETIME [not null]\n  finish_at DATETIME [not null]\n}\n\nTable t_task_detail {\n  id INT [pk, increment, not null]\n  t_task_id INT [not null]\n  nis VARCHAR [not null]\n  cell_row INT [not null]\n  datasets TEXT [not null]\n  diagram_link VARCHAR\n  status ENUM [not null]\n}\n\n",
-  "public": false,
-  "createdAt": "2025-09-24T15:41:40.084Z",
-  "updatedAt": "2025-09-24T15:41:40.084Z"
-}

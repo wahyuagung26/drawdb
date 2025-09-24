@@ -1,9 +1,0 @@
-{
-  "id": "8cfb630b-177a-4b10-8c0c-575cd1e81cc4",
-  "filename": "share.json",
-  "description": "Database Import Test",
-  "content": "Project TestDB {\n  database_type: 'MySQL'\n  Note: 'Generated from database import'\n}\n\nTable users {\n  id INT [pk, increment]\n  name VARCHAR(255) [not null]\n  email VARCHAR(255) [unique, not null]\n  created_at TIMESTAMP [not null]\n}\n\nTable posts {\n  id INT [pk, increment]\n  user_id INT [not null]\n  title VARCHAR(255) [not null]\n  content TEXT\n  created_at TIMESTAMP [not null]\n}\n\nRef: posts.user_id > users.id",
-  "public": false,
-  "createdAt": "2025-09-24T15:48:14.172Z",
-  "updatedAt": "2025-09-24T15:48:14.172Z"
-}

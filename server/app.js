@@ -29,9 +29,6 @@ app.use(session({
   }
 }));
 
-// View engine setup
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
 
 // Serve static files from React build (in production)
 if (process.env.NODE_ENV === 'production') {
@@ -42,14 +39,6 @@ if (process.env.NODE_ENV === 'production') {
 app.use('/api/database', databaseRoutes);
 app.use('/api/gists', gistsRoutes);
 
-// Database import page
-app.get('/db-import', (req, res) => {
-  res.render('db-import', {
-    title: 'Database Import - DrawDB',
-    error: null,
-    success: null
-  });
-});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -74,6 +63,5 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 DrawDB Server running on port ${PORT}`);
-  console.log(`📊 Database import page: http://localhost:${PORT}/db-import`);
   console.log(`🔗 API endpoints: http://localhost:${PORT}/api`);
 });

@@ -56,7 +56,7 @@ function columnSettings(field, database) {
 
   constraints = constraints.filter((x) => Boolean(x));
 
-  if (!constraints.length) {
+  if (!constraints || !constraints.length) {
     return "";
   }
 
@@ -119,7 +119,7 @@ export function toDBML(diagram) {
         (field.type === "ENUM" || field.type === "SET") &&
         Array.isArray(field.values)
       ) {
-        enumDefinitions += `enum ${quoteIdentifier(`${field.name}_${field.values.join("_")}_t`)} {\n\t${field.values.map((v) => quoteIdentifier(v)).join("\n\t")}\n}\n\n`;
+        enumDefinitions += `enum ${quoteIdentifier(`${field.name}_${field.values?.join("_") || "enum"}_t`)} {\n\t${field.values?.map((v) => quoteIdentifier(v)).join("\n\t") || ""}\n}\n\n`;
       }
     }
   }
@@ -127,7 +127,7 @@ export function toDBML(diagram) {
   return `${diagram.enums
     .map(
       (en) =>
-        `enum ${quoteIdentifier(en.name)} {\n${en.values.map((v) => `\t${quoteIdentifier(v)}`).join("\n")}\n}\n\n`,
+        `enum ${quoteIdentifier(en.name)} {\n${en.values?.map((v) => `\t${quoteIdentifier(v)}`).join("\n") || ""}\n}\n\n`,
     )
     .join("\n\n")}${enumDefinitions}${diagram.tables
     .map(
@@ -137,7 +137,7 @@ export function toDBML(diagram) {
             (field) =>
               `\t${quoteIdentifier(field.name)} ${
                 field.type === "ENUM" || field.type === "SET"
-                  ? quoteIdentifier(`${field.name}_${field.values.join("_")}_t`)
+                  ? quoteIdentifier(`${field.name}_${field.values?.join("_") || "enum"}_t`)
                   : field.type.toLowerCase()
               }${fieldSize(
                 field,

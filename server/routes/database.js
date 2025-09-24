@@ -56,6 +56,38 @@ router.post('/disconnect', DatabaseController.disconnect);
  */
 router.get('/status', DatabaseController.status);
 
+/**
+ * STATELESS API ROUTES FOR REACT MODAL
+ */
+
+/**
+ * @route POST /api/database/test-connection
+ * @desc Test database connection without storing in session
+ * @body {type, host, port, username, password, database}
+ */
+router.post('/test-connection', DatabaseController.testConnection);
+
+/**
+ * @route POST /api/database/get-databases
+ * @desc List databases with connection parameters (stateless)
+ * @body {type, host, port, username, password, database}
+ */
+router.post('/get-databases', DatabaseController.getDatabasesWithConnection);
+
+/**
+ * @route POST /api/database/get-tables
+ * @desc List tables with connection parameters and database (stateless)
+ * @body {type, host, port, username, password, database, selectedDatabase}
+ */
+router.post('/get-tables', DatabaseController.getTablesWithConnection);
+
+/**
+ * @route POST /api/database/import-schema
+ * @desc Import database schema directly to diagram data (stateless)
+ * @body {type, host, port, username, password, database, selectedDatabase, selectedTables}
+ */
+router.post('/import-schema', DatabaseController.importSchemaDirectly);
+
 // Error handling middleware for database routes
 router.use((error, req, res, next) => {
   console.error('Database route error:', error);

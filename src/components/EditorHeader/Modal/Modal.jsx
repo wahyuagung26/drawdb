@@ -31,6 +31,7 @@ import Open from "./Open";
 import New from "./New";
 import ImportDiagram from "./ImportDiagram";
 import ImportSource from "./ImportSource";
+import DatabaseImportModal from "./DatabaseImportModal";
 import SetTableWidth from "./SetTableWidth";
 import Language from "./Language";
 import Share from "./Share";
@@ -80,6 +81,7 @@ export default function Modal({
   const [selectedTemplateId, setSelectedTemplateId] = useState(-1);
   const [selectedDiagramId, setSelectedDiagramId] = useState(0);
   const [saveAsTitle, setSaveAsTitle] = useState(title);
+  const [databaseImportReset, setDatabaseImportReset] = useState(null);
 
   const overwriteDiagram = () => {
     setTables(importData.tables);
@@ -347,6 +349,8 @@ export default function Modal({
         return <Language />;
       case MODAL.SHARE:
         return <Share title={title} setModal={setModal} />;
+      case MODAL.DATABASE_IMPORT:
+        return <DatabaseImportModal onModalClose={setDatabaseImportReset} setTitle={setTitle} />;
       default:
         return <></>;
     }
@@ -373,6 +377,10 @@ export default function Modal({
           src: "",
           overwrite: false,
         });
+        // Reset DatabaseImportModal state when modal closes
+        if (modal === MODAL.DATABASE_IMPORT && databaseImportReset) {
+          databaseImportReset();
+        }
       }}
       onCancel={() => {
         if (modal === MODAL.RENAME) setUncontrolledTitle(title);
@@ -390,9 +398,9 @@ export default function Modal({
           ((modal === MODAL.IMG || modal === MODAL.CODE) && !exportData.data) ||
           (modal === MODAL.SAVEAS && saveAsTitle === "") ||
           (modal === MODAL.IMPORT_SRC && importSource.src === ""),
-        hidden: modal === MODAL.SHARE,
+        hidden: modal === MODAL.SHARE || modal === MODAL.DATABASE_IMPORT,
       }}
-      hasCancel={modal !== MODAL.SHARE}
+      hasCancel={modal !== MODAL.SHARE && modal !== MODAL.DATABASE_IMPORT}
       cancelText={t("cancel")}
       width={getModalWidth(modal)}
       bodyStyle={{

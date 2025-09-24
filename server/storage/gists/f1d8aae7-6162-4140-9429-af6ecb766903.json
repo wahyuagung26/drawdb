@@ -1,9 +1,0 @@
-{
-  "id": "f1d8aae7-6162-4140-9429-af6ecb766903",
-  "filename": "share.json",
-  "description": "Test database import dengan format JSON diagram",
-  "content": "{\"database\":{\"name\":\"test_db\",\"type\":\"Multi-Database\"},\"title\":\"test_db - Imported\",\"tables\":[{\"id\":\"test123\",\"name\":\"users\",\"comment\":\"\",\"color\":\"#175e7a\",\"fields\":[{\"id\":\"field1\",\"name\":\"id\",\"type\":\"INT\",\"default\":\"\",\"check\":\"\",\"primary\":true,\"unique\":true,\"notNull\":true,\"increment\":true,\"comment\":\"\"}],\"indices\":[],\"x\":20,\"y\":20}],\"relationships\":[],\"notes\":[],\"subjectAreas\":[],\"transform\":{\"zoom\":1,\"pan\":{\"x\":0,\"y\":0}}}",
-  "public": false,
-  "createdAt": "2025-09-24T16:00:03.894Z",
-  "updatedAt": "2025-09-24T16:00:03.894Z"
-}

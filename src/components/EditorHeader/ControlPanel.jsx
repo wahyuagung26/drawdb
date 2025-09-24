@@ -835,9 +835,9 @@ export default function ControlPanel({
           },
           {
             function: () => {
-              window.location.href = `${import.meta.env.VITE_BACKEND_URL}/db-import`;
+              setModal(MODAL.DATABASE_IMPORT);
             },
-            name: "Live Database",
+            name: "Remote DB",
             label: "New",
             disabled: layout.readOnly,
           },
@@ -901,12 +901,6 @@ export default function ControlPanel({
           if (database === DB.GENERIC) return;
 
           setModal(MODAL.IMPORT_SRC);
-        },
-        disabled: layout.readOnly,
-      },
-      import_from_remote_database: {
-        function: () => {
-          window.location.href = `${import.meta.env.VITE_BACKEND_URL}/db-import`;
         },
         disabled: layout.readOnly,
       },
@@ -1747,6 +1741,7 @@ export default function ControlPanel({
               <IconSaveStroked size="extra-large" />
             </button>
           </Tooltip>
+{/* Versions button disabled
           <Tooltip content={t("versions")} position="bottom">
             <button
               className="py-1 px-2 hover-2 rounded-sm text-xl -mt-0.5"
@@ -1755,6 +1750,7 @@ export default function ControlPanel({
               <i className="fa-solid fa-code-branch" />{" "}
             </button>
           </Tooltip>
+          */}
           <Tooltip content={t("to_do")} position="bottom">
             <button
               className="py-1 px-2 hover-2 rounded-sm text-xl -mt-0.5"
