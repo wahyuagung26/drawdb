@@ -27,6 +27,7 @@ const en = {
     oops_smth_went_wrong: "Oops! Something went wrong.",
     import_diagram: "Import diagram",
     import_from_source: "Import from SQL",
+    import_from_remote_database: "Import from Remote Database",
     export_as: "Export as",
     export_source: "Export SQL",
     models: "Models",

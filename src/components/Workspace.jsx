@@ -292,27 +292,33 @@ export default function WorkSpace() {
 
     const loadFromGist = async (shareId) => {
       try {
-        const { data } = await get(shareId);
-        const parsedDiagram = JSON.parse(data.files[SHARE_FILENAME].content);
+        const data = await get(shareId);
+        const content = data.files[SHARE_FILENAME].content;
+
         setUndoStack([]);
         setRedoStack([]);
         setGistId(shareId);
         setLoadedFromGistId(shareId);
+
+        // Content is always JSON diagram format now (consistent with POST /api/gists)
+        const parsedDiagram = typeof content === 'object' ? content : JSON.parse(content);
+
         setDatabase(parsedDiagram.database);
         setTitle(parsedDiagram.title);
         setTables(parsedDiagram.tables);
         setRelationships(parsedDiagram.relationships);
-        setNotes(parsedDiagram.notes);
-        setAreas(parsedDiagram.subjectAreas);
-        setTransform(parsedDiagram.transform);
-        if (databases[parsedDiagram.database].hasTypes) {
+        setNotes(parsedDiagram.notes || []);
+        setAreas(parsedDiagram.subjectAreas || []);
+        setTransform(parsedDiagram.transform || { zoom: 1, pan: { x: 0, y: 0 } });
+
+        if (databases[parsedDiagram.database]?.hasTypes) {
           setTypes(parsedDiagram.types ?? []);
         }
-        if (databases[parsedDiagram.database].hasEnums) {
+        if (databases[parsedDiagram.database]?.hasEnums) {
           setEnums(parsedDiagram.enums ?? []);
         }
       } catch (e) {
-        console.log(e);
+        console.log('Failed to load diagram:', e);
         setSaveState(State.FAILED_TO_LOAD);
       }
     };
@@ -418,8 +424,82 @@ export default function WorkSpace() {
   useEffect(() => {
     document.title = "Editor | drawDB";
 
+    // Check for imported DBML data from URL parameters (database import)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('import') === 'true') {
+      const dbmlData = urlParams.get('data');
+      if (dbmlData) {
+        try {
+          // Clear URL parameters
+          window.history.replaceState({}, document.title, window.location.pathname);
+
+          // Import the DBML data
+          const { fromDBML } = require('../utils/importFrom/dbml');
+          const importedDiagram = fromDBML(decodeURIComponent(dbmlData));
+
+          // Set the imported data
+          if (importedDiagram) {
+            setTables(importedDiagram.tables || []);
+            setRelationships(importedDiagram.relationships || []);
+            setEnums(importedDiagram.enums || []);
+            setTypes(importedDiagram.types || []);
+            setAreas(importedDiagram.areas || []);
+            setNotes(importedDiagram.notes || []);
+
+            // Set title
+            setTitle("Imported Database Schema");
+
+            // Force a save state update
+            setSaveState(State.SAVED);
+
+            return; // Skip normal load() call
+          }
+        } catch (error) {
+          console.error('Error importing DBML data from URL:', error);
+        }
+      }
+    }
+
+    // Check for imported DBML data from localStorage (legacy support)
+    const importedDBML = localStorage.getItem('importedDBML');
+    if (importedDBML) {
+      try {
+        // Clear the stored DBML data
+        localStorage.removeItem('importedDBML');
+
+        // Import the DBML data
+        const { fromDBML } = require('../utils/importFrom/dbml');
+        const importedDiagram = fromDBML(importedDBML);
+
+        // Set the imported data
+        if (importedDiagram) {
+          setTables(importedDiagram.tables || []);
+          setRelationships(importedDiagram.relationships || []);
+          setEnums(importedDiagram.enums || []);
+          setTypes(importedDiagram.types || []);
+          setAreas(importedDiagram.areas || []);
+          setNotes(importedDiagram.notes || []);
+
+          // Set title if available
+          if (importedDiagram.title) {
+            setTitle(importedDiagram.title);
+          } else {
+            setTitle("Imported Database Schema");
+          }
+
+          // Force a save state update
+          setSaveState(State.SAVED);
+
+          return; // Skip normal load() call
+        }
+      } catch (error) {
+        console.error('Error importing DBML data from localStorage:', error);
+        localStorage.removeItem('importedDBML');
+      }
+    }
+
     load();
-  }, [load]);
+  }, [load, setTables, setRelationships, setEnums, setTypes, setAreas, setNotes, setSaveState, setTitle]);
 
   return (
     <div className="h-full flex flex-col overflow-hidden theme">

@@ -1,0 +1,9 @@
+{
+  "id": "82628438-7120-47ed-9a09-75ae49c6bcab",
+  "filename": "share.json",
+  "description": "Test JSON Diagram",
+  "content": "{\"title\":\"Test Database\",\"tables\":[{\"name\":\"users\",\"comment\":\"User table\",\"color\":\"#175e7a\",\"fields\":[{\"id\":\"u1\",\"name\":\"id\",\"type\":\"INT\",\"comment\":\"Primary key\",\"unique\":false,\"increment\":true,\"notNull\":true,\"primary\":true,\"default\":\"\",\"check\":\"\"},{\"id\":\"u2\",\"name\":\"name\",\"type\":\"VARCHAR\",\"comment\":\"User name\",\"unique\":false,\"increment\":false,\"notNull\":true,\"primary\":false,\"default\":\"\",\"size\":255,\"check\":\"\"},{\"id\":\"u3\",\"name\":\"email\",\"type\":\"VARCHAR\",\"comment\":\"User email\",\"unique\":true,\"increment\":false,\"notNull\":true,\"primary\":false,\"default\":\"\",\"size\":255,\"check\":\"\"}],\"indices\":[],\"id\":\"t1\",\"x\":100,\"y\":100,\"locked\":false}],\"relationships\":[],\"notes\":[],\"subjectAreas\":[],\"database\":\"mysql\",\"transform\":{\"zoom\":1,\"pan\":{\"x\":0,\"y\":0}}}",
+  "public": false,
+  "createdAt": "2025-09-24T15:50:27.913Z",
+  "updatedAt": "2025-09-24T15:50:27.914Z"
+}

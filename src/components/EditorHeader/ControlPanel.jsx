@@ -833,6 +833,14 @@ export default function ControlPanel({
             name: "DBML",
             disabled: layout.readOnly,
           },
+          {
+            function: () => {
+              window.location.href = `${import.meta.env.VITE_BACKEND_URL}/db-import`;
+            },
+            name: "Live Database",
+            label: "New",
+            disabled: layout.readOnly,
+          },
         ],
       },
       import_from_source: {
@@ -893,6 +901,12 @@ export default function ControlPanel({
           if (database === DB.GENERIC) return;
 
           setModal(MODAL.IMPORT_SRC);
+        },
+        disabled: layout.readOnly,
+      },
+      import_from_remote_database: {
+        function: () => {
+          window.location.href = `${import.meta.env.VITE_BACKEND_URL}/db-import`;
         },
         disabled: layout.readOnly,
       },

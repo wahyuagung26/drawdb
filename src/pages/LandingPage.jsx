@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SimpleCanvas from "../components/SimpleCanvas";
 import Navbar from "../components/Navbar";
 import { diagram } from "../data/heroDiagram";
@@ -28,6 +28,7 @@ function shortenNumber(number) {
 
 export default function LandingPage() {
   const [stats, setStats] = useState({ stars: 18000, forks: 1200 });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -40,8 +41,10 @@ export default function LandingPage() {
     document.title =
       "drawDB | Online database diagram editor and SQL generator";
 
+    // Database import is now handled directly at /editor route
+
     fetchStats();
-  }, []);
+  }, [navigate]);
 
   return (
     <div>
