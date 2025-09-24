@@ -79,6 +79,8 @@ import { jsonToDocumentation } from "../../utils/exportAs/documentation";
 import { IdContext } from "../Workspace";
 import { socials } from "../../data/socials";
 import { toDBML } from "../../utils/exportAs/dbml";
+import { toLaravel } from "../../utils/exportAs/laravel";
+import { downloadLaravelMigrations } from "../../utils/downloadLaravelMigrations";
 import { exportSavedData } from "../../utils/exportSavedData";
 import { nanoid } from "nanoid";
 import { getTableHeight } from "../../utils/utils";
@@ -1168,6 +1170,37 @@ export default function ControlPanel({
                 data: result,
                 extension: "md",
               }));
+            },
+          },
+          {
+            name: "Laravel Migrations",
+            function: async () => {
+              try {
+                const result = toLaravel({
+                  tables: tables,
+                  references: relationships,
+                  types: types,
+                  enums: enums,
+                  database: database,
+                });
+
+                if (result.success) {
+                  const downloadResult = await downloadLaravelMigrations(
+                    result.migrations,
+                    title
+                  );
+
+                  if (downloadResult.success) {
+                    Toast.success(`Laravel migrations exported as ${downloadResult.filename}`);
+                  } else {
+                    Toast.error(`Export failed: ${downloadResult.error}`);
+                  }
+                } else {
+                  Toast.error(`Laravel export failed: ${result.error}`);
+                }
+              } catch (error) {
+                Toast.error(`Unexpected error: ${error.message}`);
+              }
             },
           },
         ],
