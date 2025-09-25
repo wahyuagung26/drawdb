@@ -1,22 +1,20 @@
-# Production Full-Stack Dockerfile
+# Production Dockerfile - Optimized for Memory
 
-# Stage 1: Build Frontend
-FROM node:20-alpine AS frontend-build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-RUN npm run build
-
-# Stage 2: Prepare Backend
+# Stage 1: Prepare Backend
 FROM node:20-alpine AS backend-build
 WORKDIR /app
+
+# Install build dependencies for native modules
+RUN apk add --no-cache python3 make g++
+
 COPY server/package*.json ./
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --only=production --no-audit --no-fund && npm cache clean --force
 COPY server/ .
 
-# Stage 3: Production Runtime
+# Rebuild native modules for Alpine Linux
+RUN npm rebuild
+
+# Stage 2: Production Runtime
 FROM node:20-alpine AS production
 WORKDIR /app
 
@@ -28,8 +26,8 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --from=backend-build --chown=drawdb:nodejs /app ./server
 WORKDIR /app/server
 
-# Copy frontend build to serve as static files
-COPY --from=frontend-build --chown=drawdb:nodejs /app/dist ./public
+# Copy pre-built frontend files to the correct location
+COPY --chown=drawdb:nodejs dist ../dist
 
 # Create storage directories
 RUN mkdir -p storage/gists && chown -R drawdb:nodejs storage

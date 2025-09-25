@@ -1,36 +1,37 @@
-# Ignore node_modules
 node_modules
-
-# Ignore logs
-*.log
-logs
-*.log.*
-
-# Ignore environment variables
+npm-debug.log*
+.npm
 .env
-
-# Ignore build directories and files
-dist
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.log
+.git
+.gitignore
+README*.md
+.DS_Store
+.nyc_output
+coverage
+.cache
 build
-
-# Ignore temporary files and directories
-tmp
-temp
-*.tmp
-*.swp
-*.swo
-*.bak
-
-# Ignore Docker-related files
-Dockerfile*
-docker-compose.yml
-
-# Ignore IDE/editor specific files
 .vscode
 .idea
-*.iml
-*.sublime-project
-*.sublime-workspace
-
-# Ignore OS-specific files
-.DS_Store
+*.swp
+*.swo
+*~
+.docker
+docker-compose*.yml
+Dockerfile*
+.github
+.serena
+server/storage
+server/.env
+docs
+src
+public
+index.html
+package*.json
+vite.config.js
+tailwind.config.js
+postcss.config.js
