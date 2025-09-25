@@ -1,16 +1,42 @@
+version: '3.8'
+
 services:
   drawdb:
-    image: node:20-alpine
-    container_name: drawdb
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: drawdb-app
     ports:
-      - 5173:5173
-    working_dir: /var/www/html
+      - "3001:3001"
     volumes:
-      - ./:/var/www/html
-    command: sh -c "npm install && npm run dev -- --host"
+      - drawdb-storage:/app/server/storage
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:3001}
+      - SESSION_SECRET=${SESSION_SECRET:-drawdb-secret-change-me}
+      - DB_CONNECTION_TIMEOUT=${DB_CONNECTION_TIMEOUT:-30000}
+      - DB_MAX_CONNECTIONS=${DB_MAX_CONNECTIONS:-50}
     networks:
-      - default
+      - drawdb-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); const options = { host: 'localhost', port: 3001, path: '/api/health', timeout: 2000 }; const req = http.request(options, (res) => { if (res.statusCode === 200) process.exit(0); else process.exit(1); }); req.on('error', () => process.exit(1)); req.end();"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 networks:
-  default:
+  drawdb-network:
     driver: bridge
+
+volumes:
+  drawdb-storage:
+    driver: local
