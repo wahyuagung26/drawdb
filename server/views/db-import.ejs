@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .header {
+            background: #2d3748;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+        }
+
+        .btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #718096;
+        }
+
+        .btn-secondary:hover {
+            background: #4a5568;
+        }
+
+        .btn-success {
+            background: #48bb78;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 32px;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-weight: 500;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .database-list, .table-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .database-item, .table-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .database-item:last-child, .table-item:last-child {
+            border-bottom: none;
+        }
+
+        .database-item:hover, .table-item:hover {
+            background: #f7fafc;
+        }
+
+        .database-item.selected, .table-item.selected {
+            background: #ebf8ff;
+        }
+
+        .checkbox {
+            margin-right: 12px;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .item-meta {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-top: 4px;
+        }
+
+        .progress-bar {
+            background: #e2e8f0;
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .progress-fill {
+            background: #667eea;
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+
+        .step-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .step-dot.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .step-dot.completed {
+            background: #48bb78;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Database Import</h1>
+            <p>Connect to your database and import schema to DrawDB</p>
+        </div>
+
+        <div class="content">
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step-dot active" id="dot-1">1</div>
+                <div class="step-dot" id="dot-2">2</div>
+                <div class="step-dot" id="dot-3">3</div>
+                <div class="step-dot" id="dot-4">4</div>
+            </div>
+
+            <!-- Alerts -->
+            <div id="alert-error" class="alert alert-error" style="display: none;"></div>
+            <div id="alert-success" class="alert alert-success" style="display: none;"></div>
+
+            <!-- Step 1: Connection Form -->
+            <div class="step active" id="step-connection">
+                <h2 style="margin-bottom: 24px;">Database Connection</h2>
+
+                <form id="connection-form">
+                    <div class="form-group">
+                        <label for="db-type">Database Type</label>
+                        <select id="db-type" name="type" required>
+                            <option value="">Select database type</option>
+                            <option value="mysql">MySQL</option>
+                            <option value="postgres">PostgreSQL</option>
+                            <option value="sqlite">SQLite (File Path)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="db-host">Host</label>
+                            <input type="text" id="db-host" name="host" value="localhost" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="db-port">Port</label>
+                            <input type="number" id="db-port" name="port" placeholder="3306 / 5432">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="db-username">Username</label>
+                            <input type="text" id="db-username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="db-password">Password</label>
+                            <input type="password" id="db-password" name="password">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="db-database">Database (optional)</label>
+                        <input type="text" id="db-database" name="database" placeholder="Leave empty to see all databases">
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn">Connect to Database</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Step 2: Database Selection -->
+            <div class="step" id="step-databases">
+                <h2 style="margin-bottom: 24px;">Select Database</h2>
+                <p style="margin-bottom: 16px; color: #718096;">Choose the database you want to import:</p>
+
+                <div class="database-list" id="database-list">
+                    <!-- Dynamic content -->
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="goToStep('connection')">Back</button>
+                    <button type="button" class="btn" id="select-database-btn" disabled onclick="selectDatabase()">Continue</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Table Selection -->
+            <div class="step" id="step-tables">
+                <h2 style="margin-bottom: 24px;">Select Tables</h2>
+                <p style="margin-bottom: 16px; color: #718096;">Choose the tables you want to import:</p>
+
+                <div style="margin-bottom: 16px;">
+                    <label>
+                        <input type="checkbox" id="select-all-tables" onchange="toggleAllTables(this.checked)">
+                        Select All Tables
+                    </label>
+                </div>
+
+                <div class="table-list" id="table-list">
+                    <!-- Dynamic content -->
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="goToStep('databases')">Back</button>
+                    <button type="button" class="btn" id="import-tables-btn" disabled onclick="importTables()">Import Schema</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Import Progress -->
+            <div class="step" id="step-import">
+                <h2 style="margin-bottom: 24px;">Importing Schema</h2>
+
+                <div class="loading" id="import-loading">
+                    <div class="spinner"></div>
+                    <p id="import-status">Processing database schema...</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="import-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div id="import-complete" style="display: none; text-align: center;">
+                    <h3 style="color: #48bb78; margin-bottom: 16px;">✅ Import Complete!</h3>
+                    <p style="margin-bottom: 24px;">Your database schema has been successfully imported.</p>
+
+                    <div class="button-group" style="justify-content: center;">
+                        <button type="button" class="btn btn-success" id="open-drawdb-btn">Open in DrawDB</button>
+                        <button type="button" class="btn btn-secondary" onclick="window.location.reload()">Import Another Database</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 'connection';
+        let connectionData = {};
+        let selectedDatabase = null;
+        let selectedTables = [];
+        let availableDatabases = [];
+        let availableTables = [];
+
+        // Utility functions
+        function showAlert(message, type = 'error') {
+            const alertElement = document.getElementById(`alert-${type}`);
+            alertElement.textContent = message;
+            alertElement.style.display = 'block';
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+
+        function hideAlerts() {
+            document.getElementById('alert-error').style.display = 'none';
+            document.getElementById('alert-success').style.display = 'none';
+        }
+
+        function goToStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+
+            // Show target step
+            document.getElementById(`step-${step}`).classList.add('active');
+
+            // Update step indicator
+            updateStepIndicator(step);
+
+            currentStep = step;
+            hideAlerts();
+        }
+
+        function updateStepIndicator(activeStep) {
+            const stepMap = { 'connection': 1, 'databases': 2, 'tables': 3, 'import': 4 };
+            const activeStepNum = stepMap[activeStep];
+
+            document.querySelectorAll('.step-dot').forEach((dot, index) => {
+                const stepNum = index + 1;
+                dot.classList.remove('active', 'completed');
+
+                if (stepNum < activeStepNum) {
+                    dot.classList.add('completed');
+                } else if (stepNum === activeStepNum) {
+                    dot.classList.add('active');
+                }
+            });
+        }
+
+        // Step 1: Database Connection
+        document.getElementById('connection-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            hideAlerts();
+
+            const formData = new FormData(e.target);
+            connectionData = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/database/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(connectionData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('Connected successfully!', 'success');
+
+                    // If specific database provided, skip database selection
+                    if (connectionData.database) {
+                        selectedDatabase = connectionData.database;
+                        loadTables();
+                    } else {
+                        loadDatabases();
+                    }
+                } else {
+                    showAlert(result.error || 'Connection failed');
+                }
+            } catch (error) {
+                showAlert('Connection failed: ' + error.message);
+            }
+        });
+
+        // Step 2: Database Selection
+        async function loadDatabases() {
+            try {
+                const response = await fetch('/api/database/databases');
+                const result = await response.json();
+
+                if (result.success) {
+                    availableDatabases = result.databases;
+                    renderDatabases();
+                    goToStep('databases');
+                } else {
+                    showAlert(result.error || 'Failed to load databases');
+                }
+            } catch (error) {
+                showAlert('Failed to load databases: ' + error.message);
+            }
+        }
+
+        function renderDatabases() {
+            const container = document.getElementById('database-list');
+            container.innerHTML = '';
+
+            availableDatabases.forEach(db => {
+                const item = document.createElement('div');
+                item.className = 'database-item';
+                item.onclick = () => selectDatabaseItem(db.name, item);
+
+                item.innerHTML = `
+                    <div class="checkbox">
+                        <input type="radio" name="database" value="${db.name}">
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name">${db.name}</div>
+                        <div class="item-meta">Database</div>
+                    </div>
+                `;
+
+                container.appendChild(item);
+            });
+        }
+
+        function selectDatabaseItem(dbName, itemElement) {
+            // Deselect all items
+            document.querySelectorAll('.database-item').forEach(item => {
+                item.classList.remove('selected');
+                item.querySelector('input[type="radio"]').checked = false;
+            });
+
+            // Select clicked item
+            itemElement.classList.add('selected');
+            itemElement.querySelector('input[type="radio"]').checked = true;
+            selectedDatabase = dbName;
+
+            document.getElementById('select-database-btn').disabled = false;
+        }
+
+        async function selectDatabase() {
+            if (!selectedDatabase) return;
+            loadTables();
+        }
+
+        // Step 3: Table Selection
+        async function loadTables() {
+            try {
+                const response = await fetch(`/api/database/tables/${selectedDatabase}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    availableTables = result.tables;
+                    renderTables();
+                    goToStep('tables');
+                } else {
+                    showAlert(result.error || 'Failed to load tables');
+                }
+            } catch (error) {
+                showAlert('Failed to load tables: ' + error.message);
+            }
+        }
+
+        function renderTables() {
+            const container = document.getElementById('table-list');
+            container.innerHTML = '';
+
+            availableTables.forEach(table => {
+                const item = document.createElement('div');
+                item.className = 'table-item';
+
+                item.innerHTML = `
+                    <div class="checkbox">
+                        <input type="checkbox" value="${table.name}" onchange="updateTableSelection()">
+                    </div>
+                    <div class="item-info">
+                        <div class="item-name">${table.name}</div>
+                        <div class="item-meta">${table.type || 'Table'}</div>
+                    </div>
+                `;
+
+                container.appendChild(item);
+            });
+        }
+
+        function toggleAllTables(checked) {
+            const checkboxes = document.querySelectorAll('#table-list input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.checked = checked;
+            });
+            updateTableSelection();
+        }
+
+        function updateTableSelection() {
+            selectedTables = Array.from(document.querySelectorAll('#table-list input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+
+            document.getElementById('import-tables-btn').disabled = selectedTables.length === 0;
+
+            // Update "Select All" checkbox state
+            const totalTables = availableTables.length;
+            const selectedCount = selectedTables.length;
+            const selectAllCheckbox = document.getElementById('select-all-tables');
+
+            selectAllCheckbox.checked = selectedCount === totalTables;
+            selectAllCheckbox.indeterminate = selectedCount > 0 && selectedCount < totalTables;
+        }
+
+        // Step 4: Import Process
+        async function importTables() {
+            if (selectedTables.length === 0) return;
+
+            goToStep('import');
+            document.getElementById('import-loading').classList.add('active');
+
+            try {
+                // Update progress
+                updateImportProgress(25, 'Connecting to database...');
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+                updateImportProgress(50, 'Analyzing table structure...');
+
+                // Generate DBML
+                const response = await fetch('/api/database/import', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        database: selectedDatabase,
+                        tables: selectedTables,
+                        options: { closeConnection: true }
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    updateImportProgress(75, 'Generating DBML schema...');
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    updateImportProgress(100, 'Import complete!');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // Show completion
+                    document.getElementById('import-loading').classList.remove('active');
+                    document.getElementById('import-complete').style.display = 'block';
+
+                    // Setup redirect button
+                    document.getElementById('open-drawdb-btn').onclick = () => {
+                        window.location.href = result.redirectUrl;
+                    };
+
+                } else {
+                    throw new Error(result.error || 'Import failed');
+                }
+
+            } catch (error) {
+                document.getElementById('import-loading').classList.remove('active');
+                showAlert('Import failed: ' + error.message);
+                goToStep('tables');
+            }
+        }
+
+        function updateImportProgress(percent, status) {
+            document.getElementById('import-progress').style.width = percent + '%';
+            document.getElementById('import-status').textContent = status;
+        }
+
+        // Handle database type change
+        document.getElementById('db-type').addEventListener('change', (e) => {
+            const dbType = e.target.value;
+            const portField = document.getElementById('db-port');
+            const hostField = document.getElementById('db-host');
+            const hostGroup = hostField.closest('.form-group');
+
+            // Set default ports and handle SQLite special case
+            if (dbType === 'mysql') {
+                portField.value = '3306';
+                hostGroup.style.display = 'block';
+            } else if (dbType === 'postgres') {
+                portField.value = '5432';
+                hostGroup.style.display = 'block';
+            } else if (dbType === 'sqlite') {
+                portField.value = '';
+                hostField.value = '/path/to/database.sqlite';
+                hostGroup.style.display = 'block';
+
+                // Update label for SQLite
+                hostGroup.querySelector('label').textContent = 'Database File Path';
+            } else {
+                portField.value = '';
+                hostField.value = 'localhost';
+                hostGroup.querySelector('label').textContent = 'Host';
+                hostGroup.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

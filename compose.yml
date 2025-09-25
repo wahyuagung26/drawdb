@@ -1,0 +1,48 @@
+services:
+  drawdb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
+    container_name: drawdb-app
+    ports:
+      - "3001:3001"
+    volumes:
+      - drawdb-storage:/app/server/storage
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - CLIENT_URL=${CLIENT_URL:-http://localhost:3001}
+      - SESSION_SECRET=${SESSION_SECRET:-drawdb-secret-change-me}
+      - DB_CONNECTION_TIMEOUT=${DB_CONNECTION_TIMEOUT:-30000}
+      - DB_MAX_CONNECTIONS=${DB_MAX_CONNECTIONS:-50}
+    networks:
+      - drawdb-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "const http = require('http'); const options = { host: 'localhost', port: 3001, path: '/api/health', timeout: 2000 }; const req = http.request(options, (res) => { if (res.statusCode === 200) process.exit(0); else process.exit(1); }); req.on('error', () => process.exit(1)); req.end();"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  drawdb-network:
+    driver: bridge
+
+volumes:
+  drawdb-storage:
+    driver: local
